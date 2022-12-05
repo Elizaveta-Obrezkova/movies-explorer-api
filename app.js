@@ -2,18 +2,18 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
-const { celebrate, Joi, errors } = require('celebrate');
+const { errors } = require('celebrate');
 const usersRouter = require('./routes/users');
 const moviesRouter = require('./routes/movies');
-const { login, createUser, logout } = require('./controllerrs/users');
+const authRouter = require('./routes/auth');
 const auth = require('./middlewares/auth');
 const allErrors = require('./middlewares/errors');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const NotFoundError = require('./errors/not-found-err');
 
 const allowedCors = [
-  'https://elizabeth.mesto.nomoredomains.icu',
-  'http://elizabeth.mesto.nomoredomains.icu',
+  'https://elizabeth.diplom.nomoredomains.club',
+  'http://elizabeth.diplom.nomoredomains.club',
   'localhost:3000',
   'https://localhost:3000',
   'http://localhost:3000',
@@ -21,7 +21,7 @@ const allowedCors = [
 
 const { NODE_ENV, PORT, MONGO_URL } = process.env;
 
-mongoose.connect(NODE_ENV === 'production' ? MONGO_URL : 'mongodb://localhost:27017/bitfilmsdb');
+mongoose.connect(NODE_ENV === 'production' ? MONGO_URL : 'mongodb://localhost:27017/moviesdb');
 
 const app = express();
 
@@ -54,28 +54,13 @@ app.get('/crash-test', () => {
   }, 0);
 });
 
-app.post('/signin', celebrate({
-  body: Joi.object().keys({
-    email: Joi.string().required().email(),
-    password: Joi.string().required(),
-  }),
-}), login);
-
-app.post('/signup', celebrate({
-  body: Joi.object().keys({
-    name: Joi.string().min(2).max(30),
-    email: Joi.string().required().email(),
-    password: Joi.string().required(),
-  }),
-}), createUser);
+app.use(authRouter);
 
 app.use(auth);
 
-app.use('/users', usersRouter);
+app.use(usersRouter);
 
-app.use('/movies', moviesRouter);
-
-app.get('/logout', logout);
+app.use(moviesRouter);
 
 app.use((_, res, next) => {
   next(new NotFoundError('Запрос не может быть обработан. Неправильный путь.'));
@@ -88,5 +73,5 @@ app.use(errors());
 app.use(allErrors);
 
 app.listen(PORT, () => {
-  console.log(`Listening on port ${PORT}`);
+  console.log(`Listening on port ${NODE_ENV === 'production' ? PORT : 3000}`);
 });
