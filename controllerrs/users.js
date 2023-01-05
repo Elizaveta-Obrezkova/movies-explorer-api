@@ -74,7 +74,12 @@ const updateUser = (req, res, next) => {
 };
 
 function logout(req, res) {
-  res.cookie('jwt', '', 0);
+  res.cookie('jwt', '', {
+    maxAge: 0,
+    httpOnly: true,
+    sameSite: 'None',
+    secure: true,
+  });
   res.status(200).send({ massage: 'Вы успешно вышли' });
 }
 
