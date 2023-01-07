@@ -28,7 +28,7 @@ function login(req, res, next) {
               sameSite: 'None',
               secure: true,
             });
-          res.status(200).send({ user, massage: 'Авторизация прошла успешно' });
+          res.status(200).send({ massage: 'Авторизация прошла успешно' });
         })
         .catch(next);
     })
